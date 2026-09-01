@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { customers, invoices, workOrders } from './db.ts';
+import { customers, invoices, workOrders, type Customer, type Invoice } from './db.ts';
 import { totalFor, outstandingFor } from './invoices/calc.ts';
 import { dispatch } from './scheduling/dispatch.ts';
 import { slotsFor } from './scheduling/slots.ts';
@@ -11,6 +11,19 @@ function json(res: import('node:http').ServerResponse, status: number, body: unk
   const payload = JSON.stringify(body, null, 2);
   res.writeHead(status, { 'content-type': 'application/json' });
   res.end(payload);
+}
+
+// VAT liability depends on who the invoice is for, so totals are always
+// resolved against the customer rather than from the invoice alone.
+function withTotals(invoice: Invoice, customer: Customer) {
+  const totals = totalFor(invoice, customer);
+  return {
+    ...invoice,
+    ...totals,
+    display: format(totals.total),
+    displayNet: format(totals.net),
+    displayVat: format(totals.vat),
+  };
 }
 
 export const server = createServer((req, res) => {
@@ -40,21 +53,31 @@ export const server = createServer((req, res) => {
   if (parts[0] === 'customers' && parts.length === 2) {
     const customer = customers.find((c) => c.id === parts[1]);
     if (!customer) return json(res, 404, { error: 'no such customer' });
+    const outstanding = outstandingFor(customer, invoices);
     return json(res, 200, {
       ...customer,
-      outstanding: format(outstandingFor(customer.id, invoices)),
+      // VAT inclusive, as on the invoices themselves.
+      outstandingPence: outstanding,
+      outstanding: format(outstanding),
     });
   }
 
   if (parts[0] === 'customers' && parts.length === 3 && parts[2] === 'invoices') {
-    return json(res, 200, invoices.filter((i) => i.customerId === parts[1]));
+    const customer = customers.find((c) => c.id === parts[1]);
+    if (!customer) return json(res, 404, { error: 'no such customer' });
+    return json(
+      res,
+      200,
+      invoices.filter((i) => i.customerId === customer.id).map((i) => withTotals(i, customer)),
+    );
   }
 
   if (parts[0] === 'invoices' && parts.length === 2) {
     const invoice = invoices.find((i) => i.id === parts[1]);
     if (!invoice) return json(res, 404, { error: 'no such invoice' });
-    const totals = totalFor(invoice);
-    return json(res, 200, { ...invoice, ...totals, display: format(totals.total) });
+    const customer = customers.find((c) => c.id === invoice.customerId);
+    if (!customer) return json(res, 500, { error: 'invoice has no customer', id: invoice.id });
+    return json(res, 200, withTotals(invoice, customer));
   }
 
   if (parts[0] === 'work-orders') {
