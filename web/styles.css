@@ -903,3 +903,13 @@ body {
   .tl-block { transition: none; }
   .tl-block:hover, .tl-block:focus-visible { transform: none; }
 }
+
+/* The greeting art is landscape and wing-out, so it needs more width than the
+   old portrait mark and should not be squeezed by the copy beside it. */
+.hero-welcome { gap: 1.1rem; }
+.hero-welcome .hero-art { flex: none; display: block; width: 273px; max-width: 100%; }
+.hero-welcome .hero-art img { width: 100%; height: auto; }
+.hero-welcome .hero-copy { flex: 1 1 300px; }
+@media (max-width: 860px) {
+  .hero-welcome .hero-art { width: 260px; margin: 0 auto; }
+}

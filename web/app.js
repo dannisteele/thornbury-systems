@@ -233,9 +233,22 @@ async function customerListView() {
     return;
   }
 
+  /* The greeting art is transparent, so it sits straight on the card with no
+     panel behind it. Native art is 546x407 - it is served at that size and at
+     320 for narrow screens, and never displayed larger than native, because
+     upscaling a 546px source just makes it soft. */
   const hero = `
-    <div class="hero">
-      ${pipPic(132, 'Pip the parrot holding their claws up in a heart shape')}
+    <div class="hero hero-welcome">
+      <picture class="hero-art">
+        <source type="image/webp"
+                srcset="assets/pip-welcome-320.webp 320w, assets/pip-welcome-546.webp 546w"
+                sizes="(max-width: 860px) 260px, 273px">
+        <img src="assets/pip-welcome-546.png"
+             srcset="assets/pip-welcome-320.png 320w, assets/pip-welcome-546.png 546w"
+             sizes="(max-width: 860px) 260px, 273px"
+             width="546" height="407" decoding="async" fetchpriority="high"
+             alt="Pip the parrot, mid-greeting with one wing stretched out wide">
+      </picture>
       <div class="hero-copy">
         <h1>Hello! Who are we helping today?</h1>
         <p>
