@@ -4,3 +4,6 @@ node_modules/
 
 # tooling artefacts
 .claude/evidence/
+
+# local sqlite database (created on first run, never committed)
+.data/

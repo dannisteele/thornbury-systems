@@ -1,14 +1,53 @@
 # What is still broken
 
-Fork of `rialtas-dev/thornbury-systems`, taken at `c9ba219` on 1 Sep 2026.
+Fork of `rialtas-dev/thornbury-systems`. Bug status as of 1 Sep 2026, after the
+kawaii-overhaul work.
 
-**`npm test` passes 27/27 on this checkout. Do not read that as "nothing is wrong."**
-Two of the four support jobs are unfixed here, and in both cases the tests that
-would have caught them are not in this branch either. The suite is green because
-the coverage is missing, not because the bugs are.
+`npm test` passes 72/72, and it passes identically under `TZ=UTC`,
+`Europe/London`, `America/New_York` and `Australia/Sydney`. That TZ sweep is the
+point: the suite used to be green *because* coverage was missing, and a
+host-dependent bug is exactly what it failed to catch.
 
-| Job | State on this fork |
+| Job | State |
 |---|---|
+| A - VAT on invoices | Done, merged earlier as `c9ba219`. |
+| B - two vans to one house | **Fixed here.** Cherry-picked from upstream, 4 tests. |
+| C - customer statements | **Built here** to `docs/statement-contract.md`, 18 tests. Spec still needs business sign-off. |
+| D - wrong day / wrong time quoted | **Restored here.** Cherry-picked the lost commits, verified across timezones. |
+| Engineer double-booking | **Fixed here.** Was not on the job list. |
+
+## Still open
+
+- **`rialtas-dev/main` still has the JOB D bug.** This fork is fixed; the company
+  repo is not, so real customers are still being quoted the wrong day. Needs a
+  cherry-pick of `job-d-timezone` onto their main. This is the only item here
+  with live customer impact.
+- **JOB B's PR is still open** on `ao92265/thornbury-systems` (PR #1) with tests
+  pushed to the branch and nobody but the owner able to merge it.
+- **Nothing can be written.** Every route is a GET. You cannot create a work
+  order, reassign an engineer, mark a job done or record a payment. The front end
+  is a read-only viewer.
+- **No payments table.** `Invoice.paid` is a boolean, so a statement cannot show
+  payments received, payment dates or part payments. The statement payload says
+  so in `notes[0]`. Trelawney will probably want them.
+- **No auth.** Customer names, addresses and balances on unauthenticated
+  endpoints. Fine on localhost, not anywhere else.
+- **No CI.** JOB D was merged and then silently wiped by a later merge cut from
+  before it, and nothing noticed. A test run on every PR is the systemic fix for
+  the incident that started all this.
+- **Addresses are still matched as strings.** Case and punctuation are handled;
+  `Mill Ln` vs `Mill Lane` is not. That needs a UPRN.
+- **Engineer availability is thin.** Overlap is now refused, but nothing models
+  travel time between addresses, shift patterns or working hours - W-5006 is a
+  23:30 job and nothing asks whether anyone is on shift.
+- **Experimental Node features.** `node:sqlite` and `--experimental-strip-types`
+  are both experimental. Zero-install is bought with that; fine internally, worth
+  knowing before production.
+- **No CLAUDE.md or contributor guide.** Still on Priya's list.
+
+## Detail on the fixed bugs, kept for the history
+
+---|---|
 | A — VAT on invoices | Done. Merged as `c9ba219`. |
 | B — two vans to one house | **Not fixed here.** Fix exists on a branch, PR never merged. |
 | C — customer statements | **Not started.** Also not specified. |
