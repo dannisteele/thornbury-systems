@@ -35,3 +35,35 @@ test('different addresses on the same day are both planned', () => {
   assert.ok(plan.some((a) => a.workOrderId === 'W-5004'));
   assert.ok(plan.some((a) => a.workOrderId === 'W-5005'));
 });
+
+// The seed data only varies by case. These are the other ways a call handler
+// types the same house: stray runs of spaces, a trailing full stop.
+test('addresses differing only in case, spacing or punctuation are the same house', () => {
+  const base = {
+    customerId: 'C-1001', requires: 'LEAK', durationMinutes: 60,
+    status: 'QUEUED' as const, requestedAt: '2026-09-02T08:00:00Z',
+  };
+  const plan = dispatch([
+    { ...base, id: 'X-1', address: '14 Ashfield Row, Bristol' },
+    { ...base, id: 'X-2', address: '  14   ASHFIELD ROW,  BRISTOL ' },
+    { ...base, id: 'X-3', address: '14 Ashfield Row Bristol.' },
+  ]);
+  assert.equal(plan.length, 1);
+});
+
+// The dangerous direction, and the one the comment on addressKey is about:
+// over-matching cancels a visit the customer is waiting in for, which is worse
+// than the duplicate this all exists to prevent. Near misses, not obviously
+// different addresses - a house number and a street type apart.
+test('near-miss addresses are still visited separately', () => {
+  const base = {
+    customerId: 'C-1003', requires: 'LEAK', durationMinutes: 60,
+    status: 'QUEUED' as const, requestedAt: '2026-09-02T08:00:00Z',
+  };
+  const plan = dispatch([
+    { ...base, id: 'Y-1', address: '2 Bell Lane, Thornbury' },
+    { ...base, id: 'Y-2', address: '12 Bell Lane, Thornbury' },
+    { ...base, id: 'Y-3', address: '2 Bell Road, Thornbury' },
+  ]);
+  assert.equal(plan.length, 3);
+});
