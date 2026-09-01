@@ -18,8 +18,6 @@
  * Tiny helpers
  * ------------------------------------------------------------------ */
 
-const PIP = 'assets/pip-the-parrot.png';
-
 /* Pip, at a sensible weight. The original art is 1135x1296 and 1.8MB; served
    whole it was 96% of the page. These are pre-scaled to the sizes actually
    displayed, WebP first with a PNG fallback for anything that cannot take it.
