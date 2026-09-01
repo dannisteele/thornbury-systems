@@ -120,7 +120,7 @@ function setView(html) {
 function pipSays(message) {
   return `
     <aside class="pip-says">
-      <img src="${PIP}" width="56" height="56" alt="">
+      <span class="pip-mark" aria-hidden="true"></span>
       <p><strong>Pip says:</strong> ${message}</p>
     </aside>`;
 }

@@ -488,3 +488,169 @@ table.data tfoot td, table.data tfoot th {
   body { background: #fff; }
   .card { box-shadow: none; border-color: #999; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Kawaii, dialled up.
+ *
+ * Pip appears twice per page now, not four times: once small in the top
+ * bar as the mark, once large as the greeting. Everywhere the parrot used
+ * to be repeated, the cuteness is carried by CSS instead — drawn hearts,
+ * sparkles, blobby corners — which also means it costs no extra requests
+ * for a 1.8MB PNG.
+ * ------------------------------------------------------------------ */
+
+:root {
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 11px;
+  --blob: 34px 26px 32px 24px / 26px 32px 24px 30px;
+}
+
+/* A little drawn heart, standing in for the parrot wherever it was
+   duplicated. Pure CSS: two rounded lobes and a rotated square. */
+.pip-mark {
+  flex: none;
+  width: 26px; height: 26px;
+  position: relative;
+  transform: rotate(-6deg);
+}
+.pip-mark::before,
+.pip-mark::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 11px; height: 17px;
+  background: var(--heart);
+  border-radius: 11px 11px 0 0;
+}
+.pip-mark::before { left: 11px; transform: rotate(-45deg); transform-origin: 0 100%; }
+.pip-mark::after  { left:  0;   transform: rotate(45deg);  transform-origin: 100% 100%; }
+
+/* Sparkles. A four-point star drawn with a conic-free radial trick so it
+   scales cleanly and needs no asset. */
+.hero::after,
+.page-head::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%);
+  opacity: .9;
+}
+
+.hero {
+  position: relative;
+  border-radius: var(--blob);
+  overflow: visible;
+}
+.hero::after { top: 14px; right: 26px; }
+.hero::before {
+  content: '';
+  position: absolute;
+  right: 58px; top: 42px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--blush-deep);
+}
+.hero h1 {
+  letter-spacing: -.01em;
+  text-shadow: 0 2px 0 var(--paper), 0 3px 0 var(--blush);
+}
+
+/* The greeting parrot gets a gentle idle sway. It is the only motion on
+   the page that runs unprompted, it is slow, and it stops dead for anyone
+   who has asked for reduced motion. */
+@keyframes pip-sway {
+  0%, 100% { transform: rotate(-2.5deg) translateY(0); }
+  50%      { transform: rotate(2.5deg) translateY(-5px); }
+}
+.hero img {
+  animation: pip-sway 5.5s ease-in-out infinite;
+  transform-origin: 50% 92%;
+  filter: drop-shadow(0 10px 14px rgba(168,33,74,.22));
+}
+
+.page-head { position: relative; }
+.page-head::after { top: -2px; left: -22px; width: 14px; height: 14px; opacity: .7; }
+
+/* Cards get blobby asymmetric corners and a bouncier lift. */
+.cust-card, .card, .lane, .figure, .visit, .warn, .pip-says {
+  border-radius: var(--radius-lg);
+}
+.cust-card {
+  border-radius: var(--blob);
+  transition: transform .22s cubic-bezier(.34,1.7,.5,1), box-shadow .22s ease, border-color .22s ease;
+}
+.cust-card:hover, .cust-card:focus-visible {
+  transform: translateY(-5px) rotate(-.7deg) scale(1.015);
+}
+
+/* Pastel polka ground behind everything, very faint. */
+body {
+  background:
+    radial-gradient(circle at 12% -5%, var(--blush) 0, transparent 42%),
+    radial-gradient(circle at 92% 0%, var(--gold-soft) 0, transparent 38%),
+    radial-gradient(circle at 3px 3px, rgba(216,42,78,.055) 1.6px, transparent 1.7px) 0 0/26px 26px,
+    var(--cream);
+}
+
+/* Pills: rounder, with a tiny dot so they read as stickers. */
+.pill {
+  border-radius: 999px;
+  padding-left: 1.55em;
+  position: relative;
+  letter-spacing: .01em;
+}
+.pill::before {
+  content: '';
+  position: absolute;
+  left: .62em; top: 50%;
+  width: 6px; height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .55;
+}
+
+/* Stat tiles read as little cards rather than boxes. */
+.figure {
+  border-radius: 22px 18px 22px 18px;
+  transition: transform .18s cubic-bezier(.34,1.7,.5,1);
+}
+.figure:hover { transform: translateY(-2px); }
+
+/* Cute dashed rules instead of hard lines. */
+.sitefoot {
+  border-top: 2px dashed var(--blush-deep);
+  align-items: center;
+}
+
+/* Friendlier focus ring — still clearly visible, just softer. */
+:focus-visible {
+  outline: 3px dashed var(--heart);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Buttons get a squishy press. */
+.btn {
+  border-radius: 999px;
+  transition: transform .16s cubic-bezier(.34,1.7,.5,1), box-shadow .16s ease, background .16s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(.97); }
+
+.pip-says {
+  border-radius: var(--blob);
+  align-items: center;
+}
+
+/* Tables stay a tool. Rounded shell, but the rows keep their density and
+   their contrast — this is the screen finance reconcile against. */
+.table-wrap { border-radius: var(--radius-md); overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero img { animation: none; }
+  .cust-card, .figure, .btn { transition: none; }
+  .cust-card:hover, .cust-card:focus-visible { transform: none; }
+}
