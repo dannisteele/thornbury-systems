@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Thornbury Systems — Billing &amp; Scheduling</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="assets/pip-the-parrot.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <script>
+    // Before first paint: no flash of the wrong theme on reload.
+    try {
+      var t = localStorage.getItem('thornbury-theme');
+      if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+    } catch (e) { /* private mode; system preference still applies */ }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#view">Skip to main content</a>
@@ -13,8 +20,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="#/customers">
-        <img class="brand-pip" src="assets/pip-the-parrot.png" width="52" height="52"
-             alt="Pip the parrot, the Thornbury Systems mascot">
+        <img class="brand-pip" src="assets/pip-112.png" width="52" height="59" alt="Pip the parrot, the Thornbury Systems mascot">
         <span class="brand-text">
           <span class="brand-name">Thornbury Systems</span>
           <span class="brand-sub">Billing &amp; scheduling</span>
@@ -28,6 +34,9 @@
           <li><a data-nav="slots" href="#/slots">Appointment slots</a></li>
         </ul>
       </nav>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+        <span class="tt-icon" aria-hidden="true">◑</span><span class="tt-label">Theme</span>
+      </button>
     </div>
   </header>
 

@@ -6,6 +6,7 @@ import { customers, invoices, workOrders, type Customer, type Invoice } from './
 import { totalFor, outstandingFor } from './invoices/calc.ts';
 import { dispatch } from './scheduling/dispatch.ts';
 import { slotsFor } from './scheduling/slots.ts';
+import { toDateKey, formatSlotTime } from './shared/dates.ts';
 import { format } from './shared/money.ts';
 import { statementFor, currentQuarter, StatementRangeError } from './invoices/statement.ts';
 
@@ -148,7 +149,28 @@ export const server = createServer((req, res) => {
   }
 
   if (parts[0] === 'dispatch') {
-    return json(res, 200, dispatch(workOrders));
+    // The plan itself is pure UTC. The timeline needs to lay jobs out on a UK
+    // clock, so the UK values are resolved here with the same Europe/London
+    // helpers the customer-facing slots use. The front end must never derive
+    // them itself - deriving a local date in the browser is W-4412 / JOB D.
+    return json(
+      res,
+      200,
+      dispatch(workOrders).map((a) => {
+        const order = workOrders.find((w) => w.id === a.workOrderId);
+        const minutes = order?.durationMinutes ?? 0;
+        const start = new Date(a.startsAt);
+        const end = new Date(start.getTime() + minutes * 60_000);
+        return {
+          ...a,
+          durationMinutes: minutes,
+          ukDate: toDateKey(start),
+          ukStart: formatSlotTime(start),
+          ukEnd: formatSlotTime(end),
+          ukEndDate: toDateKey(end),
+        };
+      }),
+    );
   }
 
   if (parts[0] === 'slots') {

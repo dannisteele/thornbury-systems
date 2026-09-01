@@ -38,6 +38,26 @@
   --shadow-soft:  0 2px 0 rgba(51,48,58,.04), 0 10px 24px -14px rgba(168,33,74,.35);
   --shadow-lift:  0 3px 0 rgba(51,48,58,.05), 0 18px 34px -18px rgba(168,33,74,.45);
 
+
+  /* Surfaces and edges that were hardcoded. Tokenised so dark mode can
+     actually reach them - a nav bar that stays cream when the lights go
+     off is the tell that a theme is only half wired. */
+  --topbar-bg:        rgba(255, 248, 242, .93);
+  --tint-pink:        #fff2f5;
+  --tint-pink-2:      #ffeaf1;
+  --tint-warm:        #fff6e0;
+  --row-hover:        #fff5f8;
+  --ink-blush-strong: #5c1b32;
+  --edge-mint:        #a9dcc9;
+  --edge-sky:         #b6d5f2;
+  --edge-gold:        #f0dca4;
+  --pill-unpaid-bg:   #ffe0e6;
+  --lilac-bg:         #ece4f6;
+  --lilac-ink:        #543a7a;
+  --lilac-edge:       #d6c8ea;
+  --skill-bg:         #f2eef7;
+  --skill-ink:        #4d3d66;
+
   --font: "Nunito", "Quicksand", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-num: "Segoe UI", system-ui, sans-serif;
 }
@@ -86,7 +106,7 @@ a:hover { color: var(--heart-dark); }
 
 .topbar {
   position: sticky; top: 0; z-index: 20;
-  background: rgba(255, 248, 242, .93);
+  background: var(--topbar-bg);
   backdrop-filter: blur(8px);
   border-bottom: 2px solid var(--blush);
 }
@@ -175,7 +195,7 @@ a:hover { color: var(--heart-dark); }
   margin-bottom: 1.1rem;
 }
 .pip-says img { width: 56px; height: 56px; flex: none; }
-.pip-says p { margin: 0; font-size: .92rem; color: #5c1b32; }
+.pip-says p { margin: 0; font-size: .92rem; color: var(--ink-blush-strong); }
 .pip-says strong { color: var(--blush-ink); }
 
 .hero {
@@ -187,7 +207,9 @@ a:hover { color: var(--heart-dark); }
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
 }
-.hero img { width: 132px; height: 132px; flex: none; }
+/* <picture> is display:contents, so the img is still the flex item. */
+.hero img { width: 132px; height: auto; flex: none; }
+picture { display: contents; }
 .hero .hero-copy { flex: 1 1 320px; }
 .hero h1 { margin-bottom: .25rem; }
 .hero p { margin: 0; color: var(--grey-700); max-width: 60ch; }
@@ -219,7 +241,7 @@ table.data thead th {
   border-bottom: 2px solid var(--blush-deep);
   white-space: nowrap;
 }
-table.data tbody tr:hover { background: #fff5f8; }
+table.data tbody tr:hover { background: var(--row-hover); }
 table.data tbody tr:last-child td { border-bottom: none; }
 table.data tfoot td, table.data tfoot th {
   border-top: 2px solid var(--grey-300);
@@ -256,15 +278,15 @@ table.data tfoot td, table.data tfoot th {
   white-space: nowrap;
   border: 1.5px solid transparent;
 }
-.pill-paid    { background: var(--mint);   color: var(--mint-ink);  border-color: #a9dcc9; }
-.pill-unpaid  { background: #ffe0e6;       color: var(--heart-dark);border-color: var(--blush-deep); }
-.pill-domestic{ background: var(--sky);    color: var(--sky-ink);   border-color: #b6d5f2; }
-.pill-commercial{background: var(--gold-soft); color: var(--gold-ink); border-color: #f0dca4; }
-.pill-vat     { background: #ece4f6;       color: #543a7a;          border-color: #d6c8ea; }
-.pill-queued  { background: var(--gold-soft); color: var(--gold-ink); border-color: #f0dca4; }
-.pill-dispatched { background: var(--sky); color: var(--sky-ink);   border-color: #b6d5f2; }
-.pill-done    { background: var(--mint);   color: var(--mint-ink);  border-color: #a9dcc9; }
-.pill-skill   { background: #f2eef7;       color: #4d3d66;          border-color: var(--grey-300); }
+.pill-paid    { background: var(--mint);   color: var(--mint-ink);  border-color: var(--edge-mint); }
+.pill-unpaid  { background: var(--pill-unpaid-bg);       color: var(--heart-dark);border-color: var(--blush-deep); }
+.pill-domestic{ background: var(--sky);    color: var(--sky-ink);   border-color: var(--edge-sky); }
+.pill-commercial{background: var(--gold-soft); color: var(--gold-ink); border-color: var(--edge-gold); }
+.pill-vat     { background: var(--lilac-bg);       color: var(--lilac-ink);          border-color: var(--lilac-edge); }
+.pill-queued  { background: var(--gold-soft); color: var(--gold-ink); border-color: var(--edge-gold); }
+.pill-dispatched { background: var(--sky); color: var(--sky-ink);   border-color: var(--edge-sky); }
+.pill-done    { background: var(--mint);   color: var(--mint-ink);  border-color: var(--edge-mint); }
+.pill-skill   { background: var(--skill-bg);       color: var(--skill-ink);          border-color: var(--grey-300); }
 
 /* ---------- key figures ---------- */
 
@@ -281,7 +303,7 @@ table.data tfoot td, table.data tfoot th {
   font-size: 1.45rem; font-weight: 800;
   font-family: var(--font-num); font-variant-numeric: tabular-nums;
 }
-.figure.emphasis { background: #fff2f5; border-color: var(--blush-deep); }
+.figure.emphasis { background: var(--tint-pink); border-color: var(--blush-deep); }
 .figure.emphasis dd { color: var(--heart-dark); }
 .figure .sub { display: block; font-size: .76rem; font-weight: 600; color: var(--grey-500); font-family: var(--font); }
 
@@ -303,7 +325,7 @@ table.data tfoot td, table.data tfoot th {
 }
 .lane-head {
   padding: .7rem .9rem;
-  background: linear-gradient(100deg, var(--blush) 0%, #ffeaf1 100%);
+  background: linear-gradient(100deg, var(--blush) 0%, var(--tint-pink-2) 100%);
   border-bottom: 2px solid var(--blush-deep);
   display: flex; align-items: center; gap: .5rem;
 }
@@ -316,8 +338,8 @@ table.data tfoot td, table.data tfoot th {
 }
 .lane-body { padding: .7rem; display: flex; flex-direction: column; gap: .6rem; }
 
-.lane.unplanned .lane-head { background: linear-gradient(100deg, var(--gold-soft) 0%, #fff6e0 100%); border-bottom-color: #f0dca4; }
-.lane.unplanned .lane-head .count { border-color: #f0dca4; color: var(--gold-ink); }
+.lane.unplanned .lane-head { background: linear-gradient(100deg, var(--gold-soft) 0%, var(--tint-warm) 100%); border-bottom-color: var(--edge-gold); }
+.lane.unplanned .lane-head .count { border-color: var(--edge-gold); color: var(--gold-ink); }
 
 .visit {
   border: 2px solid var(--grey-150);
@@ -328,7 +350,7 @@ table.data tfoot td, table.data tfoot th {
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 .visit:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); border-color: var(--grey-300); }
-.visit.clash { border-left-color: var(--heart); background: #fff2f5; }
+.visit.clash { border-left-color: var(--heart); background: var(--tint-pink); }
 .visit .visit-time {
   font-family: var(--font-num); font-variant-numeric: tabular-nums;
   font-size: 1.12rem; font-weight: 800;
@@ -343,7 +365,7 @@ table.data tfoot td, table.data tfoot th {
 
 .warn {
   border: 2px solid var(--heart);
-  background: #fff2f5;
+  background: var(--tint-pink);
   border-radius: var(--radius-lg);
   padding: .9rem 1.05rem;
   margin-bottom: 1.1rem;
@@ -427,10 +449,10 @@ table.data tfoot td, table.data tfoot th {
   text-align: center;
   padding: 2.5rem 1rem;
 }
-.state img { width: 120px; height: 120px; }
+.state img { width: 120px; height: auto; }
 .state h2 { margin-top: .6rem; }
 .state p { color: var(--grey-700); max-width: 52ch; margin-inline: auto; }
-.state.error { border: 2px solid var(--heart); background: #fff2f5; border-radius: var(--radius-lg); }
+.state.error { border: 2px solid var(--heart); background: var(--tint-pink); border-radius: var(--radius-lg); }
 .state .detail { font-size: .86rem; color: var(--grey-700); }
 
 .state .flap { animation: flap 1.4s ease-in-out infinite; }
@@ -470,7 +492,7 @@ table.data tfoot td, table.data tfoot th {
 @media (max-width: 900px) {
   .topbar-inner { padding: .5rem .85rem; }
   .view { padding: 1.1rem .85rem 2.5rem; }
-  .hero img { width: 96px; height: 96px; }
+  .hero img { width: 96px; height: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -653,4 +675,231 @@ body {
   .hero img { animation: none; }
   .cust-card, .figure, .btn { transition: none; }
   .cust-card:hover, .cust-card:focus-visible { transform: none; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Dark mode. Every colour is already a token, so this is a swap rather
+ * than a second stylesheet. Follows the system by default; an explicit
+ * choice is stamped on <html> as data-theme and wins in both directions.
+ *
+ * Kawaii survives the lights going off by keeping the blush and gold at
+ * full strength against a deep plum ground, rather than greying them out.
+ * Contrast is checked against the plum, not against black.
+ * ------------------------------------------------------------------ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+  :root:not([data-theme="light"]) {
+    --cream:      #201a26;
+    --cream-deep: #2a2231;
+    --paper:      #2b2333;
+
+    --grey-900:   #f6eef8;
+    --grey-700:   #d5c7dc;
+    --grey-500:   #a99bb2;
+    --grey-300:   #4d4258;
+    --grey-150:   #3a3145;
+
+    --blush:      #4a2740;
+    --blush-deep: #6d3355;
+    --blush-ink:  #ffc2d8;
+
+    --heart:      #ff6f92;
+    --heart-dark: #ffa3bb;
+
+    --gold:       #ffcf5c;
+    --gold-soft:  #40331d;
+    --gold-ink:   #ffdf95;
+
+    --mint:       #1f4740;
+    --mint-ink:   #8fe0c6;
+
+    --sky:        #22384f;
+    --sky-ink:    #a8d2f7;
+
+    --shadow-soft: 0 2px 0 rgba(0,0,0,.25), 0 10px 24px -14px rgba(0,0,0,.7);
+    --shadow-lift: 0 3px 0 rgba(0,0,0,.3), 0 18px 34px -18px rgba(0,0,0,.8);
+ 
+    --topbar-bg:        rgba(32, 26, 38, .92);
+    --tint-pink:        #3a2130;
+    --tint-pink-2:      #4a2740;
+    --tint-warm:        #3a2f1c;
+    --row-hover:        #33293c;
+    --ink-blush-strong: #ffc2d8;
+    --edge-mint:        #2f6b5b;
+    --edge-sky:         #35597d;
+    --edge-gold:        #7a6430;
+    --pill-unpaid-bg:   #55283a;
+    --lilac-bg:         #372c4d;
+    --lilac-ink:        #d9c8f5;
+    --lilac-edge:       #4d3f6b;
+    --skill-bg:         #352d45;
+    --skill-ink:        #d3c6e6;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --cream:      #201a26;
+  --cream-deep: #2a2231;
+  --paper:      #2b2333;
+
+  --grey-900:   #f6eef8;
+  --grey-700:   #d5c7dc;
+  --grey-500:   #a99bb2;
+  --grey-300:   #4d4258;
+  --grey-150:   #3a3145;
+
+  --blush:      #4a2740;
+  --blush-deep: #6d3355;
+  --blush-ink:  #ffc2d8;
+
+  --heart:      #ff6f92;
+  --heart-dark: #ffa3bb;
+
+  --gold:       #ffcf5c;
+  --gold-soft:  #40331d;
+  --gold-ink:   #ffdf95;
+
+  --mint:       #1f4740;
+  --mint-ink:   #8fe0c6;
+
+  --sky:        #22384f;
+  --sky-ink:    #a8d2f7;
+
+  --shadow-soft: 0 2px 0 rgba(0,0,0,.25), 0 10px 24px -14px rgba(0,0,0,.7);
+  --shadow-lift: 0 3px 0 rgba(0,0,0,.3), 0 18px 34px -18px rgba(0,0,0,.8);
+
+  --topbar-bg:        rgba(32, 26, 38, .92);
+  --tint-pink:        #3a2130;
+  --tint-pink-2:      #4a2740;
+  --tint-warm:        #3a2f1c;
+  --row-hover:        #33293c;
+  --ink-blush-strong: #ffc2d8;
+  --edge-mint:        #2f6b5b;
+  --edge-sky:         #35597d;
+  --edge-gold:        #7a6430;
+  --pill-unpaid-bg:   #55283a;
+  --lilac-bg:         #372c4d;
+  --lilac-ink:        #d9c8f5;
+  --lilac-edge:       #4d3f6b;
+  --skill-bg:         #352d45;
+  --skill-ink:        #d3c6e6;
+}
+
+/* The polka ground needs to read as light-on-dark, not dark-on-dark. */
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 12% -5%, var(--blush) 0, transparent 42%),
+    radial-gradient(circle at 92% 0%, var(--gold-soft) 0, transparent 38%),
+    radial-gradient(circle at 3px 3px, rgba(255,255,255,.05) 1.6px, transparent 1.7px) 0 0/26px 26px,
+    var(--cream);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body {
+    background:
+      radial-gradient(circle at 12% -5%, var(--blush) 0, transparent 42%),
+      radial-gradient(circle at 92% 0%, var(--gold-soft) 0, transparent 38%),
+      radial-gradient(circle at 3px 3px, rgba(255,255,255,.05) 1.6px, transparent 1.7px) 0 0/26px 26px,
+      var(--cream);
+  }
+}
+
+/* Theme toggle, in the top bar. */
+.theme-toggle {
+  border: 2px solid var(--grey-300);
+  background: var(--paper);
+  color: var(--grey-900);
+  border-radius: 999px;
+  padding: .34rem .8rem;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  transition: transform .16s cubic-bezier(.34,1.7,.5,1), border-color .16s ease;
+}
+.theme-toggle:hover { transform: translateY(-2px); border-color: var(--heart); }
+.theme-toggle .tt-icon { font-size: 1rem; line-height: 1; }
+
+/* ------------------------------------------------------------------ *
+ * The round: a timeline of the day, one row per engineer.
+ * ------------------------------------------------------------------ */
+.tl-card { margin-bottom: 1rem; }
+.tl-lede { margin: -.2rem 0 1rem; }
+.tl-day + .tl-day { margin-top: 1.4rem; }
+.tl-date {
+  margin: 0 0 .55rem;
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--grey-700);
+}
+.tl { display: flex; flex-direction: column; gap: .5rem; }
+.tl-row { display: flex; align-items: stretch; gap: .6rem; }
+.tl-who {
+  flex: none;
+  width: 4.2rem;
+  display: flex;
+  align-items: center;
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--grey-700);
+}
+.tl-track {
+  position: relative;
+  flex: 1;
+  min-height: 46px;
+  background: var(--cream-deep);
+  border: 2px solid var(--grey-150);
+  border-radius: 14px;
+}
+.tl-tick {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--grey-150);
+}
+.tl-tick-label {
+  position: absolute;
+  top: 2px; left: 3px;
+  font-size: .62rem;
+  font-weight: 700;
+  color: var(--grey-500);
+  font-family: var(--font-num);
+}
+.tl-block {
+  position: absolute;
+  top: 15px; bottom: 5px;
+  min-width: 2.4rem;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  padding: 0 .45rem;
+  border-radius: 11px;
+  background: var(--blush);
+  border: 2px solid var(--blush-deep);
+  color: var(--blush-ink);
+  font-size: .72rem;
+  font-weight: 800;
+  text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  box-shadow: var(--shadow-soft);
+  transition: transform .16s cubic-bezier(.34,1.7,.5,1), filter .16s ease;
+}
+.tl-block:hover, .tl-block:focus-visible { transform: translateY(-2px); filter: brightness(1.04); }
+.tl-block-time { font-family: var(--font-num); }
+.tl-block-what { opacity: .75; font-weight: 700; }
+
+@media (max-width: 720px) {
+  .tl-row { flex-direction: column; gap: .2rem; }
+  .tl-who { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl-block { transition: none; }
+  .tl-block:hover, .tl-block:focus-visible { transform: none; }
 }

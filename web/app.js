@@ -20,6 +20,25 @@
 
 const PIP = 'assets/pip-the-parrot.png';
 
+/* Pip, at a sensible weight. The original art is 1135x1296 and 1.8MB; served
+   whole it was 96% of the page. These are pre-scaled to the sizes actually
+   displayed, WebP first with a PNG fallback for anything that cannot take it.
+   width/height are the real intrinsic ratio so nothing reflows on load. */
+const PIP_SRC = {
+  small: { base: 'assets/pip-112', w: 112, h: 128 },
+  large: { base: 'assets/pip-320', w: 320, h: 365 },
+};
+
+function pipPic(px, alt = '', cls = '') {
+  const pick = px > 64 ? PIP_SRC.large : PIP_SRC.small;
+  const h = Math.round((px * pick.h) / pick.w);
+  return `<picture>
+      <source srcset="${pick.base}.webp" type="image/webp">
+      <img${cls ? ` class="${cls}"` : ''} src="${pick.base}.png"
+           width="${px}" height="${h}" alt="${alt}" decoding="async">
+    </picture>`;
+}
+
 /** Escape for interpolation into HTML. */
 function esc(value) {
   if (value === null || value === undefined) return '';
@@ -128,7 +147,7 @@ function pipSays(message) {
 function loadingState(what) {
   return `
     <div class="state" role="status" aria-live="polite">
-      <img class="flap" src="${PIP}" width="120" height="120" alt="">
+      ${pipPic(120, '', 'flap')}
       <h2>Fetching ${esc(what)}…</h2>
       <p>Pip has flown off to the billing service. One moment.</p>
       <div style="max-width:420px;margin:1.2rem auto 0">
@@ -148,7 +167,7 @@ function errorState(err, what) {
       : 'That did not work';
   return `
     <div class="state error" role="alert">
-      <img src="${PIP}" width="120" height="120" alt="">
+      ${pipPic(120)}
       <h2>${headline}</h2>
       <p>Pip could not load ${esc(what)}.</p>
       <p class="detail"><strong>${esc(err.message)}</strong></p>
@@ -160,7 +179,7 @@ function errorState(err, what) {
 function emptyState(title, body) {
   return `
     <div class="state">
-      <img src="${PIP}" width="120" height="120" alt="">
+      ${pipPic(120)}
       <h2>${esc(title)}</h2>
       <p>${esc(body)}</p>
     </div>`;
@@ -216,8 +235,7 @@ async function customerListView() {
 
   const hero = `
     <div class="hero">
-      <img src="${PIP}" width="132" height="132"
-           alt="Pip the parrot holding their claws up in a heart shape">
+      ${pipPic(132, 'Pip the parrot holding their claws up in a heart shape')}
       <div class="hero-copy">
         <h1>Hello! Who are we helping today?</h1>
         <p>
@@ -545,7 +563,7 @@ async function statementView(id, params) {
       head(
         notBuilt
           ? `<div class="state error" role="alert">
-               <img src="${PIP}" width="120" height="120" alt="">
+               ${pipPic(120)}
                <h2>The statement endpoint is not live yet</h2>
                <p>This screen is ready and waiting for
                   <span class="mono">GET /customers/:id/statement</span>. As soon as the route
@@ -858,7 +876,7 @@ async function dispatchView() {
 
   const clashBanner = clashes.length
     ? `<div class="warn" role="alert">
-        <h2><img src="${PIP}" width="28" height="28" alt=""> Two vans, one house</h2>
+        <h2>${pipPic(28)} Two vans, one house</h2>
         <p class="why">
           These visits are planned at what looks like the <strong>same address on the same UK day</strong>
           once capitalisation and punctuation are ignored. The planner should already have merged
@@ -893,8 +911,9 @@ async function dispatchView() {
       <div class="grow">
         <h1>Dispatch board</h1>
         <p class="lede">
-          Who is going where, and when. Times on this board are the <strong>stored UTC</strong>
-          times, shown exactly as the service holds them. The customer-facing window is on the
+          Who is going where, and when. The round below is on a <strong>UK local</strong> clock,
+          resolved by the service. The engineer cards underneath show the <strong>stored UTC</strong>
+          times exactly as they are held. The customer-facing window is on the
           <a href="#/slots">appointment slots</a> screen.
         </p>
       </div>
@@ -911,6 +930,19 @@ async function dispatchView() {
     </section>
 
     ${clashBanner}
+
+    ${
+      planned.length
+        ? `<section class="card tl-card">
+             <div class="card-head"><h2>The round</h2></div>
+             <p class="lede tl-lede">
+               Each block is a job, sized by how long it takes, on a
+               <strong>UK local</strong> clock. Overlaps show as overlaps.
+             </p>
+             ${timelineFor(planned, orderById, customerById)}
+           </section>`
+        : ''
+    }
 
     ${
       planned.length || unplanned.length
@@ -1064,7 +1096,7 @@ async function route() {
     document.title = 'Not found — Thornbury Systems';
     setView(`
       <div class="state">
-        <img src="${PIP}" width="120" height="120" alt="">
+        ${pipPic(120)}
         <h2>Pip cannot find that page</h2>
         <p>There is nothing at <span class="mono">${esc(location.hash)}</span>.</p>
         <p><a class="btn" href="#/customers">Back to customers</a></p>
@@ -1086,4 +1118,162 @@ if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', start);
 } else {
   start();
+}
+
+/* ------------------------------------------------------------------ *
+ * Theme toggle.
+ *
+ * Three states, not two: an explicit dark, an explicit light, and "follow
+ * the system", which is what you get with nothing stored. The choice is
+ * stamped on <html> as data-theme and the CSS is written so an explicit
+ * choice beats the media query in both directions.
+ *
+ * localStorage can throw outright in a locked-down browser, so every read
+ * and write is guarded and the page still renders correctly with nothing
+ * stored.
+ * ------------------------------------------------------------------ */
+(function themeToggle() {
+  const KEY = 'thornbury-theme';
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+
+  const systemDark = () =>
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  function stored() {
+    try {
+      const v = localStorage.getItem(KEY);
+      return v === 'dark' || v === 'light' ? v : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function isDark() {
+    const s = stored();
+    return s ? s === 'dark' : systemDark();
+  }
+
+  function paint() {
+    const dark = isDark();
+    btn.setAttribute('aria-pressed', String(dark));
+    btn.querySelector('.tt-icon').textContent = dark ? '☾' : '☀';
+    btn.querySelector('.tt-label').textContent = dark ? 'Dark' : 'Light';
+    btn.title = dark ? 'Switch to light' : 'Switch to dark';
+  }
+
+  btn.addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem(KEY, next);
+    } catch (e) {
+      /* not persisted, but the current page still switches */
+    }
+    paint();
+  });
+
+  // Follow the system while the user has not made an explicit choice.
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => { if (!stored()) paint(); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+  }
+
+  paint();
+})();
+
+/* ------------------------------------------------------------------ *
+ * The round, as a timeline.
+ *
+ * One row per engineer, laid out on a UK clock, each job a block sized by
+ * how long it actually takes. A number in a tile tells you there are two
+ * visits; this shows you they are on top of each other.
+ *
+ * Every time here comes from the service as a UK-local 'HH:MM' string and
+ * is turned into minutes by splitting the string. No Date is constructed
+ * and nothing is reformatted: deriving local time in the browser is the
+ * W-4412 bug, and it is not coming back through this screen.
+ * ------------------------------------------------------------------ */
+function minsOfDay(hhmm) {
+  if (typeof hhmm !== 'string' || hhmm.length < 4) return null;
+  const bits = hhmm.split(':');
+  const h = Number(bits[0]);
+  const m = Number(bits[1]);
+  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+}
+
+function timelineFor(planned, orderById, customerById) {
+  const usable = planned.filter((a) => minsOfDay(a.ukStart) !== null && a.ukDate);
+  if (!usable.length) return '';
+
+  const days = [...new Set(usable.map((a) => a.ukDate))].sort();
+
+  return days
+    .map((day) => {
+      const onDay = usable.filter((a) => a.ukDate === day);
+
+      // A job crossing midnight is clamped to the end of its own day rather
+      // than wrapping, so the bar never renders backwards.
+      const spans = onDay.map((a) => {
+        const from = minsOfDay(a.ukStart);
+        let to = minsOfDay(a.ukEnd);
+        if (to === null || a.ukEndDate !== day || to <= from) to = Math.min(from + (a.durationMinutes || 30), 1440);
+        return { a, from, to: Math.max(to, from + 10) };
+      });
+
+      // Axis snaps to whole hours with a little air either side.
+      const first = Math.max(0, Math.floor(Math.min(...spans.map((s) => s.from)) / 60) * 60 - 60);
+      const last = Math.min(1440, Math.ceil(Math.max(...spans.map((s) => s.to)) / 60) * 60 + 60);
+      const width = Math.max(60, last - first);
+      const pct = (m) => ((m - first) / width) * 100;
+
+      const hours = [];
+      for (let m = first; m <= last; m += 60) hours.push(m);
+
+      const engineers = [...new Set(onDay.map((a) => a.engineerId))].sort();
+
+      const ticks = hours
+        .map(
+          (m) =>
+            `<span class="tl-tick" style="left:${pct(m).toFixed(3)}%">
+               <span class="tl-tick-label">${String(Math.floor(m / 60)).padStart(2, '0')}:00</span>
+             </span>`,
+        )
+        .join('');
+
+      const rows = engineers
+        .map((eid) => {
+          const mine = spans.filter((s) => s.a.engineerId === eid).sort((x, y) => x.from - y.from);
+          const blocks = mine
+            .map((s) => {
+              const o = orderById.get(s.a.workOrderId);
+              const cust = o && customerById.get(o.customerId);
+              const left = pct(s.from);
+              const w = pct(s.to) - left;
+              const label = `${s.a.ukStart}–${s.a.ukEnd} · ${s.a.workOrderId}`;
+              return `<a class="tl-block" href="#/dispatch"
+                        style="left:${left.toFixed(3)}%;width:${w.toFixed(3)}%"
+                        title="${esc(label)} · ${esc(s.a.address)}">
+                        <span class="tl-block-time">${esc(s.a.ukStart)}</span>
+                        <span class="tl-block-what">${esc(o ? o.requires : '')}</span>
+                        <span class="visually-hidden">
+                          ${esc(label)}, ${esc(s.a.address)}${cust ? ', ' + esc(cust.name) : ''}
+                        </span>
+                      </a>`;
+            })
+            .join('');
+          return `<div class="tl-row">
+              <div class="tl-who"><span class="mono">${esc(eid)}</span></div>
+              <div class="tl-track">${ticks}${blocks}</div>
+            </div>`;
+        })
+        .join('');
+
+      return `<section class="tl-day" aria-label="Round for ${esc(day)}">
+          <h3 class="tl-date">${esc(day)}</h3>
+          <div class="tl">${rows}</div>
+        </section>`;
+    })
+    .join('');
 }
